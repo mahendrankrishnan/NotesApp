@@ -190,27 +190,27 @@ Example `.env` file:
 
 ```env
 # PostgreSQL Database Configuration
-POSTGRES_USER=notesuser
-POSTGRES_PASSWORD=notespassword
-POSTGRES_DB=notesdb
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+POSTGRES_DB=
 
 # Database Connection URL
 # Use 'postgres' as hostname (Docker service name, not 'localhost')
-DATABASE_URL=postgresql://notesuser:notespassword@postgres:5432/notesdb
+DATABASE_URL=
 
 # Application Ports
-BACKEND_PORT=4202
-FRONTEND_PORT=4203
+BACKEND_PORT=
+FRONTEND_PORT=
 
 # Frontend API URL
 NEXT_PUBLIC_API_URL=http://localhost:4202
 
 # Kafka Configuration
 KAFKA_ENABLED=true
-KAFKA_BROKERS=kafka:29092
-KAFKA_CLIENT_ID=notes-app-backend
-KAFKA_LOG_TOPIC=application-logs
-SERVICE_NAME=notes-app-backend
+KAFKA_BROKERS=
+KAFKA_CLIENT_ID=
+KAFKA_LOG_TOPIC=
+SERVICE_NAME=
 ```
 
 **Important**: 

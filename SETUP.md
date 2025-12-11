@@ -29,7 +29,7 @@ CREATE DATABASE notesdb;
 Create `backend/.env` file:
 
 ```env
-DATABASE_URL=postgresql://username:password@localhost:5436/notesdb
+DATABASE_URL=
 PORT=4202
 ```
 
