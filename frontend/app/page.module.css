@@ -1,0 +1,72 @@
+.headerSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background-color: #0070f3;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 112, 243, 0.3);
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #1a1a1a;
+  margin: 0;
+  font-weight: 700;
+  background: linear-gradient(135deg, #0070f3 0%, #0051cc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.newNoteButton {
+  padding: 0.75rem 1.5rem;
+  background-color: #0070f3;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.newNoteButton:hover {
+  background-color: #0051cc;
+  transform: translateY(-2px);
+}
+
+.errorMessage {
+  background-color: #fee;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.editFormContainer {
+  margin-bottom: 2rem;
+}
+
+.loadingMessage {
+  text-align: center;
+  margin-top: 2rem;
+}
+
