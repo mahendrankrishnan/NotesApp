@@ -1,5 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { notesRoutes } from './routes/notes.js';
 import { logsRoutes } from './routes/logs.js';
 import { kafkaService } from './services/kafka.js';
@@ -17,12 +19,70 @@ fastify.register(cors, {
   credentials: true,
 });
 
+// Register Swagger
+fastify.register(swagger, {
+  openapi: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Notes API',
+      description: 'API documentation for the Notes application',
+      version: '1.0.0',
+    },
+    servers: [
+      {
+        url: `http://localhost:${process.env.PORT || '4202'}`,
+        description: 'Development server',
+      },
+    ],
+    tags: [
+      { name: 'notes', description: 'Notes related endpoints' },
+      { name: 'logs', description: 'Logging related endpoints' },
+    ],
+  },
+});
+
+// Register Swagger UI
+fastify.register(swaggerUi, {
+  routePrefix: '/docs',
+  uiConfig: {
+    docExpansion: 'list',
+    deepLinking: false,
+  },
+  uiHooks: {
+    onRequest: function (request, reply, next) {
+      next();
+    },
+    preHandler: function (request, reply, next) {
+      next();
+    },
+  },
+  staticCSP: true,
+  transformStaticCSP: (header) => header,
+  transformSpecification: (swaggerObject, request, reply) => {
+    return swaggerObject;
+  },
+  transformSpecificationClone: true,
+});
+
 // Register routes
 fastify.register(notesRoutes);
 fastify.register(logsRoutes);
 
 // Health check
-fastify.get('/health', async (request, reply) => {
+fastify.get('/health', {
+  schema: {
+    description: 'Health check endpoint',
+    tags: ['health'],
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          status: { type: 'string', example: 'ok' },
+        },
+      },
+    },
+  },
+}, async (request, reply) => {
   return { status: 'ok' };
 });
 

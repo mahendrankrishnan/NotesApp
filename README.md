@@ -126,6 +126,49 @@ pnpm dev
 The frontend will be available at http://localhost:4203
 The backend API will be available at http://localhost:4202
 
+## API Documentation
+
+The backend API includes comprehensive Swagger/OpenAPI documentation with schema validation.
+
+### Accessing Swagger UI
+
+Once the backend server is running, you can access the interactive API documentation at:
+
+**http://localhost:4202/docs**
+
+The Swagger UI provides:
+- Complete API endpoint documentation
+- Request/response schemas
+- Interactive API testing
+- Schema validation details
+
+### API Endpoints
+
+#### Notes API (`/notes`)
+- `GET /notes` - Get all notes
+- `GET /notes/:id` - Get a single note by ID
+- `POST /notes` - Create a new note
+- `PUT /notes/:id` - Update an existing note
+- `DELETE /notes/:id` - Delete a note
+
+#### Logs API (`/api/logs`)
+- `GET /api/logs` - Get application logs with optional filtering
+- `GET /api/logs/stats` - Get log statistics
+- `GET /api/logs/status` - Get Kafka connection status
+
+#### Health Check
+- `GET /health` - Health check endpoint
+
+### Schema Validation
+
+All API endpoints include JSON Schema validation for:
+- Request parameters
+- Request body
+- Query parameters
+- Response formats
+
+Invalid requests will automatically return `400 Bad Request` with validation error details.
+
 ## Scripts
 
 - `pnpm dev` - Start both frontend and backend in development mode
@@ -163,6 +206,7 @@ docker-compose down -v
 The application will be available at:
 - **Frontend**: http://localhost:4203
 - **Backend API**: http://localhost:4202
+- **API Documentation (Swagger)**: http://localhost:4202/docs
 - **PostgreSQL**: localhost:5436
 - **Kafka**: localhost:9092
 

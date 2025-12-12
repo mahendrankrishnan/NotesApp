@@ -4,10 +4,31 @@ import { notes, type NewNote } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 import { logger } from '../services/logger.js';
 import { LogLevel, EventType } from '../types/events.js';
+import {
+  noteSchema,
+  createNoteSchema,
+  updateNoteSchema,
+  noteIdParamSchema,
+  errorSchema,
+  successMessageSchema,
+} from '../schemas/notes.js';
 
 export async function notesRoutes(fastify: FastifyInstance) {
   // Get end point to get all notes
-  fastify.get('/notes', async (request, reply) => {
+  fastify.get('/notes', {
+    schema: {
+      description: 'Get all notes',
+      tags: ['notes'],
+      response: {
+        200: {
+          type: 'array',
+          items: noteSchema,
+          description: 'List of all notes',
+        },
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     const startTime = Date.now();
     try {
       await logger.logDatabaseQuery({
@@ -60,7 +81,21 @@ export async function notesRoutes(fastify: FastifyInstance) {
   });
 
   // Get a single note by ID
-  fastify.get<{ Params: { id: string } }>('/notes/:id', async (request, reply) => {
+  fastify.get<{ Params: { id: string } }>('/notes/:id', {
+    schema: {
+      description: 'Get a single note by ID',
+      tags: ['notes'],
+      params: noteIdParamSchema,
+      response: {
+        200: {
+          ...noteSchema,
+          description: 'Note details',
+        },
+        404: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const id = parseInt(request.params.id);
       const note = await db.select().from(notes).where(eq(notes.id, id)).limit(1);
@@ -76,13 +111,23 @@ export async function notesRoutes(fastify: FastifyInstance) {
   });
 
   // Create a new note
-  fastify.post<{ Body: NewNote }>('/notes', async (request, reply) => {
+  fastify.post<{ Body: NewNote }>('/notes', {
+    schema: {
+      description: 'Create a new note',
+      tags: ['notes'],
+      body: createNoteSchema,
+      response: {
+        201: {
+          ...noteSchema,
+          description: 'Created note',
+        },
+        400: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const { title, content } = request.body;
-      
-      if (!title || !content) {
-        return reply.status(400).send({ error: 'Title and content are required' });
-      }
 
       const newNote = await db.insert(notes).values({
         title,
@@ -97,7 +142,23 @@ export async function notesRoutes(fastify: FastifyInstance) {
   });
 
   // Update a note
-  fastify.put<{ Params: { id: string }; Body: Partial<NewNote> }>('/notes/:id', async (request, reply) => {
+  fastify.put<{ Params: { id: string }; Body: Partial<NewNote> }>('/notes/:id', {
+    schema: {
+      description: 'Update an existing note',
+      tags: ['notes'],
+      params: noteIdParamSchema,
+      body: updateNoteSchema,
+      response: {
+        200: {
+          ...noteSchema,
+          description: 'Updated note',
+        },
+        404: errorSchema,
+        400: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const id = parseInt(request.params.id);
       const { title, content } = request.body;
@@ -123,7 +184,18 @@ export async function notesRoutes(fastify: FastifyInstance) {
   });
 
   // Delete a note
-  fastify.delete<{ Params: { id: string } }>('/notes/:id', async (request, reply) => {
+  fastify.delete<{ Params: { id: string } }>('/notes/:id', {
+    schema: {
+      description: 'Delete a note by ID',
+      tags: ['notes'],
+      params: noteIdParamSchema,
+      response: {
+        200: successMessageSchema,
+        404: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       const id = parseInt(request.params.id);
       

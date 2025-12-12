@@ -2,6 +2,13 @@ import { FastifyInstance } from 'fastify';
 import { logConsumerService } from '../services/log-consumer.js';
 import { logger } from '../services/logger.js';
 import { EventType } from '../types/events.js';
+import {
+  logsResponseSchema,
+  logStatsSchema,
+  logStatusSchema,
+  logsQuerySchema,
+  errorSchema,
+} from '../schemas/logs.js';
 
 export async function logsRoutes(fastify: FastifyInstance) {
   // Get logs with optional filtering
@@ -11,7 +18,18 @@ export async function logsRoutes(fastify: FastifyInstance) {
       level?: string; 
       eventType?: string;
     } 
-  }>('/api/logs', async (request, reply) => {
+  }>('/api/logs', {
+    schema: {
+      description: 'Get application logs with optional filtering',
+      tags: ['logs'],
+      querystring: logsQuerySchema,
+      response: {
+        200: logsResponseSchema,
+        503: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       if (!logConsumerService.isKafkaEnabled()) {
         return reply.status(503).send({ 
@@ -43,7 +61,17 @@ export async function logsRoutes(fastify: FastifyInstance) {
   });
 
   // Get log statistics
-  fastify.get('/api/logs/stats', async (request, reply) => {
+  fastify.get('/api/logs/stats', {
+    schema: {
+      description: 'Get log statistics',
+      tags: ['logs'],
+      response: {
+        200: logStatsSchema,
+        503: errorSchema,
+        500: errorSchema,
+      },
+    },
+  }, async (request, reply) => {
     try {
       if (!logConsumerService.isKafkaEnabled()) {
         return reply.status(503).send({ 
@@ -70,7 +98,15 @@ export async function logsRoutes(fastify: FastifyInstance) {
   });
 
   // Get Kafka connection status
-  fastify.get('/api/logs/status', async (request, reply) => {
+  fastify.get('/api/logs/status', {
+    schema: {
+      description: 'Get Kafka connection status',
+      tags: ['logs'],
+      response: {
+        200: logStatusSchema,
+      },
+    },
+  }, async (request, reply) => {
     return reply.send({
       kafkaEnabled: logConsumerService.isKafkaEnabled(),
     });
