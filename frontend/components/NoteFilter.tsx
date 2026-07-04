@@ -38,7 +38,7 @@ export default function NoteFilter({
             </svg>
             <input
               type="text"
-              placeholder="Search by title or description..."
+              placeholder="Search by title..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className={styles.searchInput}

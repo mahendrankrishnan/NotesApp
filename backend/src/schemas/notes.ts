@@ -62,6 +62,19 @@ export const noteIdParamSchema = {
   required: ['id'],
 } as const;
 
+export const notesListQuerySchema = {
+  type: 'object',
+  properties: {
+    title: {
+      type: 'string',
+      minLength: 1,
+      maxLength: 500,
+      description: 'Filter notes by title (case-insensitive partial match)',
+    },
+  },
+  additionalProperties: false,
+} as const;
+
 export const errorSchema = {
   type: 'object',
   properties: {

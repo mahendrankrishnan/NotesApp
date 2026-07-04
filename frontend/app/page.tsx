@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import NoteList from '@/components/NoteList'
 import NoteForm from '@/components/NoteForm'
@@ -19,11 +19,19 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterToday, setFilterToday] = useState(false)
 
-  const fetchNotes = async () => {
+  const fetchNotes = useCallback(async (title?: string) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch(`${API_URL}/notes`)
+
+      const params = new URLSearchParams()
+      const trimmedTitle = title?.trim()
+      if (trimmedTitle) {
+        params.set('title', trimmedTitle)
+      }
+
+      const query = params.toString()
+      const response = await fetch(`${API_URL}/notes${query ? `?${query}` : ''}`)
       if (!response.ok) {
         throw new Error('Failed to fetch notes')
       }
@@ -34,11 +42,15 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchNotes()
-  }, [])
+    const timeout = setTimeout(() => {
+      fetchNotes(searchQuery)
+    }, searchQuery.trim() ? 300 : 0)
+
+    return () => clearTimeout(timeout)
+  }, [searchQuery, fetchNotes])
 
 
   const handleUpdateNote = async (id: number, title: string, content: string) => {
@@ -56,7 +68,7 @@ export default function Home() {
       }
 
       setEditingNote(null)
-      await fetchNotes()
+      await fetchNotes(searchQuery)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update note')
     }
@@ -72,7 +84,7 @@ export default function Home() {
         throw new Error('Failed to delete note')
       }
 
-      await fetchNotes()
+      await fetchNotes(searchQuery)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete note')
     }
@@ -82,35 +94,21 @@ export default function Home() {
     setEditingNote(note)
   }
 
-  // Filter notes based on search query and date filter
   const filteredNotes = useMemo(() => {
-    let filtered = [...notes]
-
-    // Filter by today's date if enabled
-    if (filterToday) {
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const tomorrow = new Date(today)
-      tomorrow.setDate(tomorrow.getDate() + 1)
-
-      filtered = filtered.filter((note) => {
-        const noteDate = new Date(note.createdAt)
-        return noteDate >= today && noteDate < tomorrow
-      })
+    if (!filterToday) {
+      return notes
     }
 
-    // Filter by search query (title or content)
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase().trim()
-      filtered = filtered.filter((note) => {
-        const titleMatch = note.title.toLowerCase().includes(query)
-        const contentMatch = note.content.toLowerCase().includes(query)
-        return titleMatch || contentMatch
-      })
-    }
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
 
-    return filtered
-  }, [notes, searchQuery, filterToday])
+    return notes.filter((note) => {
+      const noteDate = new Date(note.createdAt)
+      return noteDate >= today && noteDate < tomorrow
+    })
+  }, [notes, filterToday])
 
   return (
     <div>
@@ -163,7 +161,7 @@ export default function Home() {
         </div>
       )}
 
-      {!loading && notes.length > 0 && (
+      {!loading && (notes.length > 0 || !!searchQuery.trim() || filterToday) && (
         <NoteFilter
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
@@ -180,7 +178,10 @@ export default function Home() {
           notes={filteredNotes}
           onEdit={handleEditNote}
           onDelete={handleDeleteNote}
-          showNoResults={notes.length > 0 && filteredNotes.length === 0}
+          showNoResults={
+            (notes.length > 0 || !!searchQuery.trim() || filterToday) &&
+            filteredNotes.length === 0
+          }
         />
       )}
     </div>

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { db } from '../db/index.js';
 import { notes, type NewNote } from '../db/schema.js';
-import { eq } from 'drizzle-orm';
+import { eq, ilike } from 'drizzle-orm';
 import { logger } from '../services/logger.js';
 import { LogLevel, EventType } from '../types/events.js';
 import {
@@ -9,16 +9,18 @@ import {
   createNoteSchema,
   updateNoteSchema,
   noteIdParamSchema,
+  notesListQuerySchema,
   errorSchema,
   successMessageSchema,
 } from '../schemas/notes.js';
 
 export async function notesRoutes(fastify: FastifyInstance) {
   // Get end point to get all notes
-  fastify.get('/notes', {
+  fastify.get<{ Querystring: { title?: string } }>('/notes', {
     schema: {
-      description: 'Get all notes',
+      description: 'Get all notes, optionally filtered by title',
       tags: ['notes'],
+      querystring: notesListQuerySchema,
       response: {
         200: {
           type: 'array',
@@ -30,21 +32,31 @@ export async function notesRoutes(fastify: FastifyInstance) {
     },
   }, async (request, reply) => {
     const startTime = Date.now();
+    const titleFilter = request.query.title?.trim();
+
     try {
       await logger.logDatabaseQuery({
         timestamp: new Date().toISOString(),
         level: LogLevel.INFO,
         eventType: EventType.DATABASE_QUERY,
         service: process.env.SERVICE_NAME || 'notes-app-backend',
-        message: 'Fetching all notes',
+        message: titleFilter
+          ? `Fetching notes matching title "${titleFilter}"`
+          : 'Fetching all notes',
         metadata: {
           operation: 'SELECT',
           table: 'notes',
           duration: Date.now() - startTime,
         },
       });
-      
-      const allNotes = await db.select().from(notes).orderBy(notes.createdAt);
+
+      const allNotes = titleFilter
+        ? await db
+            .select()
+            .from(notes)
+            .where(ilike(notes.title, `%${titleFilter}%`))
+            .orderBy(notes.createdAt)
+        : await db.select().from(notes).orderBy(notes.createdAt);
       
       await logger.logDatabaseQuery({
         timestamp: new Date().toISOString(),
