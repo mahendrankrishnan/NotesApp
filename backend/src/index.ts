@@ -4,6 +4,7 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { notesRoutes } from './routes/notes.js';
 import { logsRoutes } from './routes/logs.js';
+import { authRoutes } from './routes/auth.js';
 import { kafkaService } from './services/kafka.js';
 import { logConsumerService } from './services/log-consumer.js';
 import { logger } from './services/logger.js';
@@ -37,6 +38,7 @@ fastify.register(swagger, {
     tags: [
       { name: 'notes', description: 'Notes related endpoints' },
       { name: 'logs', description: 'Logging related endpoints' },
+      { name: 'auth', description: 'Authentication and authorization endpoints' },
     ],
   },
 });
@@ -67,6 +69,7 @@ fastify.register(swaggerUi, {
 // Register routes
 fastify.register(notesRoutes);
 fastify.register(logsRoutes);
+fastify.register(authRoutes);
 
 // Health check
 fastify.get('/health', {

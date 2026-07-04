@@ -3,7 +3,6 @@
 A full-stack notes application built with Next.js (frontend) and Fastify (backend), using PostgreSQL and Drizzle ORM. Added to view real-time application logs from Kafka. Kafka Event Logging
 
 
-
 ## Tech Stack
 
 - **Frontend**: Next.js 14 with TypeScript

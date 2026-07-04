@@ -36,3 +36,31 @@
   opacity: 0.8;
 }
 
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userInfo {
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.roles {
+  opacity: 0.75;
+}
+
+.logoutButton {
+  background: transparent;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.logoutButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+

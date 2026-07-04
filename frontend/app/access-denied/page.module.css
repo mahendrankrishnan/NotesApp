@@ -1,0 +1,43 @@
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  padding: 2rem;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  background: #fff5f5;
+}
+
+.title {
+  color: #c0392b;
+  font-size: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.message {
+  color: #333333;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.detail {
+  color: #666666;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  padding: 0.75rem 1rem;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+}

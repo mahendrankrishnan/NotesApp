@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
+import { AuthProvider } from '@/contexts/AuthContext'
+import AuthShell from '@/components/AuthShell'
 
 export const metadata: Metadata = {
   title: 'Notes Application',
@@ -16,11 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Header />
-        <main className="container">
-          {children}
-        </main>
-        <Footer />
+        <AuthProvider>
+          <AuthShell>{children}</AuthShell>
+        </AuthProvider>
       </body>
     </html>
   )

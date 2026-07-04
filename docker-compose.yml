@@ -6,6 +6,12 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo srvr | nc localhost 2181 | grep -q Zookeeper"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - notes-network
 
@@ -13,7 +19,8 @@ services:
     image: confluentinc/cp-kafka:7.5.0
     container_name: notes-kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "${KAFKA_PORT:-9092}:9092"
     environment:
@@ -27,10 +34,11 @@ services:
     networks:
       - notes-network
     healthcheck:
-      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test: ["CMD", "cub", "kafka-ready", "-b", "localhost:9092", "1", "20"]
+      interval: 15s
+      timeout: 15s
+      retries: 10
+      start_period: 90s
 
   postgres:
     image: postgres:16-alpine
@@ -38,13 +46,13 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-testsuser}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-testpassword}
-      POSTGRES_DB: ${POSTGRES_DB:-notesdb}
+      POSTGRES_DB: ${POSTGRES_DB:-testnotesdb}
     ports:
       - "5436:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-notesuser} -d ${POSTGRES_DB:-notesdb}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-testsuser} -d ${POSTGRES_DB:-testnotesdb}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -65,6 +73,8 @@ services:
       KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID:-notes-app-backend}
       KAFKA_LOG_TOPIC: ${KAFKA_LOG_TOPIC:-application-logs}
       SERVICE_NAME: ${SERVICE_NAME:-notes-app-backend}
+      AUTH_API_URL: ${AUTH_API_URL:-http://host.docker.internal:4501}
+      REQUIRED_APP_NAME: ${REQUIRED_APP_NAME:-MyNote}
     ports:
       - "${BACKEND_PORT:-4202}:${BACKEND_PORT:-4202}"
     depends_on:
@@ -84,6 +94,8 @@ services:
     container_name: notes-frontend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4202}
+      NEXT_PUBLIC_AUTH_API_URL: ${NEXT_PUBLIC_AUTH_API_URL:-http://localhost:4501}
+      NEXT_PUBLIC_REQUIRED_APP_NAME: ${NEXT_PUBLIC_REQUIRED_APP_NAME:-MyNote}
       NODE_ENV: production
     ports:
       - "${FRONTEND_PORT:-4203}:4203"
